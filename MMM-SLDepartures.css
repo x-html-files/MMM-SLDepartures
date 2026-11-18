@@ -74,6 +74,12 @@
   text-decoration: line-through;
 }
 
+.SLDEP-stale {
+  color: var(--color-orange, var(--color-text-dimmed));
+  font-size: 0.7em;
+  text-align: right;
+}
+
 /* Disruption marker. Kept to a single character so a busy day does not turn the
  * band into a wall of text; the full message is in the title attribute. */
 .SLDEP-deviation {

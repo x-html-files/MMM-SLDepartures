@@ -92,8 +92,8 @@ Module.register("MMM-SLDepartures", {
 		});
 		// Re-render only when a displayed countdown changes, without another fetch.
 		this.countdownTimer = setInterval(() => {
-			if (this.error || !this.departures) return;
-			const key = this.departures.map((d) => this.remainingTime(d)).join("|");
+			if (!this.departures) return;
+			const key = this.displayKey();
 			if (key !== this.countdownKey) {
 				this.countdownKey = key;
 				this.updateDom(0);
@@ -114,6 +114,16 @@ Module.register("MMM-SLDepartures", {
 		return minutes === 0 ? "NOW" : `${minutes} min`;
 	},
 
+	visibleDepartures (now = Date.now()) {
+		if (!this.error) return this.departures;
+		// Cached departures without a reliable future timestamp cannot be safely shown.
+		return this.departures.filter((d) => Number.isFinite(d.timestamp) && d.timestamp >= now);
+	},
+
+	displayKey (now = Date.now()) {
+		return this.visibleDepartures(now).map((d) => `${d.timestamp}:${this.remainingTime(d, now)}`).join("|");
+	},
+
 	socketNotificationReceived (notification, payload) {
 		// One node_helper serves every instance, so ignore other instances' data.
 		if (payload?.identifier !== this.identifier) return;
@@ -121,10 +131,12 @@ Module.register("MMM-SLDepartures", {
 		if (notification === "SLDEP_DATA") {
 			this.departures = payload.departures;
 			this.error = null;
-			this.countdownKey = this.departures.map((d) => this.remainingTime(d)).join("|");
+			this.countdownKey = this.displayKey();
 			this.updateDom(300);
 		} else if (notification === "SLDEP_ERROR") {
 			this.error = payload.error;
+			if (Array.isArray(payload.departures)) this.departures = payload.departures;
+			if (this.departures) this.countdownKey = this.displayKey();
 			Log.error(`[MMM-SLDepartures] ${payload.error}`);
 			this.updateDom(300);
 		}
@@ -134,8 +146,8 @@ Module.register("MMM-SLDepartures", {
 		const wrapper = document.createElement("div");
 		wrapper.className = "SLDEP";
 
-		if (this.error) {
-			// Show a dash rather than a stack trace or a stale list.
+		if (this.error && this.departures === null) {
+			// No successful response is available to show.
 			wrapper.classList.add("SLDEP-error");
 			wrapper.textContent = "—";
 			return wrapper;
@@ -147,16 +159,26 @@ Module.register("MMM-SLDepartures", {
 			return wrapper;
 		}
 
-		if (this.departures.length === 0) {
-			wrapper.classList.add("SLDEP-empty");
-			wrapper.textContent = "—";
+		if (this.error) {
+			const warning = document.createElement("div");
+			warning.className = "SLDEP-stale";
+			warning.textContent = "⚠ Data may be outdated";
+			wrapper.appendChild(warning);
+		}
+
+		const departures = this.visibleDepartures();
+		if (departures.length === 0) {
+			const empty = document.createElement("div");
+			empty.className = "SLDEP-empty";
+			empty.textContent = "—";
+			wrapper.appendChild(empty);
 			return wrapper;
 		}
 
 		const table = document.createElement("table");
 		table.className = "SLDEP-table";
 
-		for (const d of this.departures) {
+		for (const d of departures) {
 			const row = document.createElement("tr");
 			row.className = "SLDEP-row";
 			if (d.cancelled) row.classList.add("SLDEP-cancelled");

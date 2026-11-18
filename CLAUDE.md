@@ -76,7 +76,7 @@ line numbers) to need updating — that test exists to tell you the payload move
   a MagicMirror modules directory with no build step.
 - Fetching stays in `node_helper.js`: the API sends no CORS headers, and one
   server-side request serves every attached browser.
-- Failure renders a single `—`, never a stack trace and never a stale list that
-  looks current. The second is worse, because someone acts on it.
+- Failure shows cached upcoming departures with a visible stale-data warning;
+  never let stale data look current. If no cached data exists, render `—`.
 - `.gitattributes` pins LF. This module runs on Linux; a Windows contributor must
   not be able to push CRLF into it.
