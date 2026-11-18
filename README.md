@@ -8,14 +8,14 @@ wall display. Commuter trains, metro, buses, trams and ferries — **no API key,
 monthly anything.**
 
 ```
-43  Uppsala C       16:49
-41  Märsta          17:04
-40  Kungsängen   !  17:19
-43  Uppsala C       17:34
+43  Uppsala C       16:49  NOW
+41  Märsta          17:04  14 min
+40  Kungsängen   !  17:19  29 min
+43  Uppsala C       17:34  44 min
 ```
 
-Line, destination, departure time. `!` marks a disruption, with the message on hover; a delayed time
-is highlighted and a cancelled one struck through.
+Line, destination, departure time and time remaining. `!` marks a disruption, with the message on
+hover; a delayed time is highlighted and a cancelled one struck through.
 
 ## Why this exists
 
@@ -25,8 +25,10 @@ those modules no longer work. This one targets the current
 [SL Transport API](https://www.trafiklab.se/api/trafiklab-apis/sl/transport/)
 (`transport.integration.sl.se`), which needs no key at all.
 
-It also shows **absolute clock times** rather than countdowns, because a wall display is read from
-across a room and "7 min" means doing arithmetic against a clock you can already see.
+It shows both **absolute clock times** and a countdown. The countdown uses the expected departure
+time when available, updates locally between polls, displays `NOW` below one minute and is blank
+at 60 minutes or more. It is also blank for cancelled, past or unparseable departures. Minutes are
+rounded down, so 59 minutes 59 seconds is shown as `59 min`.
 
 Beyond that: realtime where SL provides it (the `expected` time, falling back to the timetable),
 filtering by direction, transport mode and line, and disruption flags with the routine station noise
@@ -198,6 +200,31 @@ that one request serves every attached browser rather than one per screen.
 
 ## Development
 
+### Local browser preview
+
+With Node.js 20 or newer, run `npm run preview` and open
+<http://127.0.0.1:8080/>. This runs the actual module and its node helper
+without installing MagicMirror or copying anything to a Raspberry Pi. The server
+listens only on your computer and fetches live SL departures. For an offline
+preview, open <http://127.0.0.1:8080/?fixture=1>; its captured times are **not
+current**, and the fixture only represents T-Centralen.
+
+To see normal, delayed and cancelled departures and countdown states side by side, use the
+[simulated disruptions preview](http://127.0.0.1:8080/?demo=1). These are fake,
+preformatted rows, not live data; they bypass the site and departure filters so
+the examples are always visible. You can edit the sample rows in
+[preview/preview.js](preview/preview.js). Display options such as column and
+deviation visibility still apply.
+
+Edit the overrides at the top of [preview/preview.js](preview/preview.js) to
+match your MagicMirror configuration. Refresh the browser after editing the
+module, styles or preview configuration; restart the server after editing the
+node helper or its libraries. The preview approximates MagicMirror's styling
+and APIs, so check the final appearance in MagicMirror too. Stop the server with
+Ctrl+C. Set `PORT` before starting it if port 8080 is already in use.
+
+### Tests and lint
+
 ```bash
 npm test
 ```
@@ -206,7 +233,7 @@ npm test
 npm run lint
 ```
 
-15 tests, run against a real captured API response (`tests/fixture-tcentralen.json`), so they need
+Tests run against a real captured API response (`tests/fixture-tcentralen.json`), so they need
 no network and cannot be broken by SL having a bad day. CI runs them on Node 20 and 24.
 
 Use the npm scripts rather than calling `node --test` directly — the portable invocation is fussier

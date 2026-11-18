@@ -85,10 +85,33 @@ Module.register("MMM-SLDepartures", {
 	start () {
 		this.departures = null; // null = still loading, [] = loaded but empty
 		this.error = null;
+		this.countdownKey = "";
 		this.sendSocketNotification("SLDEP_CONFIG", {
 			identifier: this.identifier,
 			config: this.config
 		});
+		// Re-render only when a displayed countdown changes, without another fetch.
+		this.countdownTimer = setInterval(() => {
+			if (this.error || !this.departures) return;
+			const key = this.departures.map((d) => this.remainingTime(d)).join("|");
+			if (key !== this.countdownKey) {
+				this.countdownKey = key;
+				this.updateDom(0);
+			}
+		}, 1000);
+	},
+
+	stop () {
+		clearInterval(this.countdownTimer);
+	},
+
+	remainingTime (departure, now = Date.now()) {
+		if (departure.cancelled || !Number.isFinite(departure.timestamp)) return "";
+		const remaining = departure.timestamp - now;
+		if (remaining < 0) return "";
+		const minutes = Math.floor(remaining / 60000);
+		if (minutes > 59) return "";
+		return minutes === 0 ? "NOW" : `${minutes} min`;
 	},
 
 	socketNotificationReceived (notification, payload) {
@@ -98,6 +121,7 @@ Module.register("MMM-SLDepartures", {
 		if (notification === "SLDEP_DATA") {
 			this.departures = payload.departures;
 			this.error = null;
+			this.countdownKey = this.departures.map((d) => this.remainingTime(d)).join("|");
 			this.updateDom(300);
 		} else if (notification === "SLDEP_ERROR") {
 			this.error = payload.error;
@@ -164,6 +188,11 @@ Module.register("MMM-SLDepartures", {
 			if (d.delayed) time.classList.add("SLDEP-delayed");
 			time.textContent = d.cancelled ? "—" : d.time;
 			row.appendChild(time);
+
+			const remaining = document.createElement("td");
+			remaining.className = "SLDEP-remaining";
+			remaining.textContent = this.remainingTime(d);
+			row.appendChild(remaining);
 
 			table.appendChild(row);
 		}

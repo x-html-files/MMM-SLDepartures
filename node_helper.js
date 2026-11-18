@@ -7,7 +7,7 @@
 
 const NodeHelper = require("node_helper");
 const Log = require("logger");
-const { filterDepartures, formatTime, isDelayed, isCancelled, deviationMessages } = require("./lib/departures");
+const { filterDepartures, formatTime, departureTimestamp, isDelayed, isCancelled, deviationMessages } = require("./lib/departures");
 
 const API_BASE = "https://transport.integration.sl.se/v1";
 
@@ -52,6 +52,7 @@ module.exports = NodeHelper.create({
 			const body = await res.json();
 			const departures = filterDepartures(body, config).map((d) => ({
 				time: formatTime(d),
+				timestamp: departureTimestamp(d),
 				line: d.line?.designation ?? "",
 				destination: d.destination ?? "",
 				delayed: isDelayed(d),

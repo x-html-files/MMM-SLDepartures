@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { filterDepartures, formatTime, isDelayed, isCancelled, deviationMessages } = require("../lib/departures");
+const { filterDepartures, formatTime, departureTimestamp, isDelayed, isCancelled, deviationMessages } = require("../lib/departures");
 
 /* A real, unedited /v1/sites/9001/departures response (T-Centralen) captured
  * from the live API.
@@ -96,6 +96,16 @@ test("formatTime degrades to a dash rather than throwing", () => {
 	assert.equal(formatTime({}), "—");
 	assert.equal(formatTime({ expected: null, scheduled: null }), "—");
 	assert.equal(formatTime({ expected: "nonsense" }), "—");
+});
+
+test("departureTimestamp interprets Stockholm wall time independently of host timezone", () => {
+	assert.equal(departureTimestamp({ scheduled: "2026-01-15T12:30:00" }), Date.parse("2026-01-15T11:30:00Z"));
+	assert.equal(departureTimestamp({ expected: "2026-07-15T12:30:00", scheduled: "2026-07-15T12:25:00" }), Date.parse("2026-07-15T10:30:00Z"));
+	assert.equal(departureTimestamp({ expected: "2026-07-15T12:30:00+02:00" }), Date.parse("2026-07-15T10:30:00Z"));
+	assert.equal(departureTimestamp({ scheduled: "2026-03-29T02:30:00" }), null, "nonexistent spring time");
+	assert.equal(departureTimestamp({ scheduled: "2026-10-25T02:30:00" }, Date.parse("2026-10-25T00:00:00Z")), Date.parse("2026-10-25T00:30:00Z"));
+	assert.equal(departureTimestamp({ scheduled: "2026-10-25T02:30:00" }, Date.parse("2026-10-25T01:00:00Z")), Date.parse("2026-10-25T01:30:00Z"));
+	assert.equal(departureTimestamp({ scheduled: "invalid" }), null);
 });
 
 test("isDelayed compares expected against scheduled", () => {

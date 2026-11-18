@@ -9,11 +9,16 @@
 
 .SLDEP {
   --sldep-gap: 0.6em;
+  --color-orange: #FFAA0F; 
+   --color-orange-dimmed: #c6860e; 
+  --color-red: #ff2525;
+  --color-red-dimmed: #ac1a1a;
 }
 
 .SLDEP-table {
   border-spacing: 0;
   width: 100%;
+  font-size:1.2em;
 }
 
 .SLDEP-row {
@@ -23,14 +28,14 @@
 /* Line designation, e.g. "43". Dimmed: which line it is matters less than when
  * it leaves, and at most stations it is always the same line anyway. */
 .SLDEP-line {
-  color: var(--color-text-dimmed);
-  padding-right: var(--sldep-gap);
+  color: var(--color-red-dimmed);
+  padding-right: 10px;
   text-align: left;
   white-space: nowrap;
 }
 
 .SLDEP-destination {
-  color: var(--color-text);
+  color: var(--color-text-bright);
   overflow: hidden;
   padding-right: var(--sldep-gap);
   text-align: left;
@@ -48,7 +53,14 @@
 }
 
 .SLDEP-delayed {
-  color: var(--color-text);
+  color: var(--color-orange-dimmed);
+}
+
+.SLDEP-remaining {
+  color: var(--color-red);
+  padding-left: var(--sldep-gap);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .SLDEP-cancelled {
@@ -59,7 +71,7 @@
 /* Disruption marker. Kept to a single character so a busy day does not turn the
  * band into a wall of text; the full message is in the title attribute. */
 .SLDEP-deviation {
-  color: var(--color-text-dimmed);
+  color: var(--color-orange);
   font-weight: bold;
 }
 

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MMM-SLDepartures preview</title>
+  <link rel="stylesheet" href="/MMM-SLDepartures.css">
+  <style>
+    :root { --color-text: #aaa; --color-text-dimmed: #666; --color-text-bright: #fff; }
+    body { margin: 0; background: #000; color: var(--color-text); font: 20px/1.5 sans-serif; }
+    .preview-note { margin: 1.5rem; color: #777; font-size: 13px; }
+    a { color: #aaa; }
+    .region { position: absolute; right: 4%; bottom: 5%; text-align: right; }
+    .module-header { border-bottom: 1px solid #666; margin-bottom: 0.5em; text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="preview-note">Local preview · <a href="/">Live data</a> · <a href="/?fixture=1">Offline fixture</a> · <a href="/?demo=1">Delayed &amp; cancelled sample</a> <span id="mode"></span></div>
+  <div class="region"><div id="module"></div></div>
+  <script src="/preview.js"></script>
+  <script src="/MMM-SLDepartures.js"></script>
+</body>
+</html>

@@ -20,6 +20,8 @@ export default [
 				clearInterval: "readonly",
 				fetch: "readonly",
 				AbortController: "readonly",
+				URL: "readonly",
+				URLSearchParams: "readonly",
 				// MagicMirror frontend
 				Module: "readonly",
 				Log: "readonly",
