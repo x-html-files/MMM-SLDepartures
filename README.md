@@ -27,8 +27,9 @@ those modules no longer work. This one targets the current
 
 It shows both **absolute clock times** and a countdown. The countdown uses the expected departure
 time when available, updates locally between polls, displays `NOW` below one minute and is blank
-at 60 minutes or more. It is also blank for cancelled, past or unparseable departures. Minutes are
-rounded down, so 59 minutes 59 seconds is shown as `59 min`.
+at 60 minutes or more. Live rows continue to show `NOW` after the expected time until the API
+removes them. The countdown is blank for cancelled or unparseable departures. Minutes are rounded
+down, so 59 minutes 59 seconds is shown as `59 min`.
 
 Beyond that: realtime where SL provides it (the `expected` time, falling back to the timetable),
 filtering by direction, transport mode and line, and disruption flags with the routine station noise

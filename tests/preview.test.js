@@ -95,7 +95,7 @@ test("simulated disruptions render delayed and cancelled departures without fetc
 	now += 56000;
 	timer();
 	rows = container.children[0].children[0].children;
-	assert.equal(rows[3].children[3].textContent, "", "passed departures do not stay NOW");
+	assert.equal(rows[3].children[3].textContent, "NOW", "live rows stay NOW after the expected time");
 });
 
 test("remaining-time boundaries and cancellation", () => {
@@ -103,7 +103,8 @@ test("remaining-time boundaries and cancellation", () => {
 	const context = vm.createContext({ Module: { register: (_name, module) => { definition = module; } } });
 	vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "MMM-SLDepartures.js"), "utf8"), context);
 	const remaining = (milliseconds, cancelled = false) => definition.remainingTime({ timestamp: milliseconds, cancelled }, 0);
-	assert.equal(remaining(-1), "");
+	assert.equal(remaining(-1), "NOW");
+	assert.equal(remaining(-60000), "NOW");
 	assert.equal(remaining(0), "NOW");
 	assert.equal(remaining(59999), "NOW");
 	assert.equal(remaining(60000), "1 min");

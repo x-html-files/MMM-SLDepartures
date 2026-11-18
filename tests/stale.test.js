@@ -83,3 +83,15 @@ test("helper cache restores after reload and unparseable cached times are hidden
 	assert.match(dom.children[0].textContent, /outdated/);
 	assert.equal(dom.children[1].children.length, 1);
 });
+
+test("live departures stay NOW until a successful response removes them", () => {
+	const app = setup();
+	const { instance } = app;
+	instance.socketNotificationReceived("SLDEP_DATA", { identifier: "one", departures: [departure(1001000)] });
+	app.advance(2000);
+	app.tick();
+	assert.equal(instance.getDom().children[0].children[0].children[3].textContent, "NOW");
+	assert.equal(app.sends(), 1, "the countdown does not send another request");
+	instance.socketNotificationReceived("SLDEP_DATA", { identifier: "one", departures: [] });
+	assert.equal(instance.getDom().children[0].textContent, "—");
+});

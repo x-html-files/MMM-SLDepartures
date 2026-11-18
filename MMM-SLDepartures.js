@@ -108,10 +108,9 @@ Module.register("MMM-SLDepartures", {
 	remainingTime (departure, now = Date.now()) {
 		if (departure.cancelled || !Number.isFinite(departure.timestamp)) return "";
 		const remaining = departure.timestamp - now;
-		if (remaining < 0) return "";
 		const minutes = Math.floor(remaining / 60000);
 		if (minutes > 59) return "";
-		return minutes === 0 ? "NOW" : `${minutes} min`;
+		return minutes <= 0 ? "NOW" : `${minutes} min`;
 	},
 
 	visibleDepartures (now = Date.now()) {
