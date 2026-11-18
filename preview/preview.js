@@ -8,9 +8,10 @@ const previewConfig = {
 
 const params = new URLSearchParams(globalThis.location.search);
 const demoMode = params.get("demo") === "1";
+const staleMode = demoMode && params.get("stale") === "1";
 const fixtureMode = params.get("fixture") === "1";
 document.getElementById("mode").textContent = demoMode
-	? "(simulated: normal, delayed, cancelled, now, over an hour; not real departures)"
+	? staleMode ? "(simulated cached data after an error; not real departures)" : "(simulated: normal, delayed, cancelled, now, over an hour; not real departures)"
 	: fixtureMode ? "(captured data; times are not current)" : "(live SL data)";
 
 // Already formatted like a helper response so these examples always render,
@@ -57,6 +58,7 @@ globalThis.Module = {
 							deviations: payload.config.showDeviations ? departure.deviations : []
 						}))
 					});
+					if (staleMode) this.socketNotificationReceived("SLDEP_ERROR", { identifier: this.identifier, error: "Simulated API error" });
 					return;
 				}
 				const refresh = async () => {

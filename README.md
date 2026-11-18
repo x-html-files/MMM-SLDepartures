@@ -191,9 +191,16 @@ the line's *route*, not of the station, so there is no shortcut: run the command
 
 ## When something goes wrong
 
-A wall display should never show a stack trace, and should never show a stale list that looks
-current — the second is worse, because you act on it. On a network error, timeout or non-200
-response the module renders a single `—` and logs the reason. The next poll recovers on its own.
+On a network error, timeout or non-200 response, the module keeps the last successful departures
+and displays **⚠ Data may be outdated**. Cached departure times can change or be cancelled while
+the connection is down; do not treat them as live information. Countdowns continue updating each
+second without making API requests, and cached departures disappear as their times pass. If no
+successful response has been received, or no cached departures remain, a `—` is shown instead.
+The warning disappears when a request succeeds. The cache is in memory and is lost when the helper
+restarts.
+
+For HTTP 429 responses, polling waits at least until the API's `Retry-After` time when supplied;
+otherwise it waits at least one minute. Increase `updateInterval` if rate limits persist.
 
 Fetching happens server-side in `node_helper.js`, both because the API sends no CORS headers and so
 that one request serves every attached browser rather than one per screen.
@@ -214,7 +221,8 @@ To see normal, delayed and cancelled departures and countdown states side by sid
 preformatted rows, not live data; they bypass the site and departure filters so
 the examples are always visible. You can edit the sample rows in
 [preview/preview.js](preview/preview.js). Display options such as column and
-deviation visibility still apply.
+deviation visibility still apply. The [cached data sample](http://127.0.0.1:8080/?demo=1&stale=1)
+shows the warning and expiration behavior after a simulated API error.
 
 Edit the overrides at the top of [preview/preview.js](preview/preview.js) to
 match your MagicMirror configuration. Refresh the browser after editing the
